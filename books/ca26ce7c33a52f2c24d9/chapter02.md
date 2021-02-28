@@ -11,9 +11,9 @@ Java でいうところの下記をやりたい際に、どうしたらよいか
 ```java
 public class Main {
 	public static void main(String... args) {
-			int x = 1;
-			x = 2;
-			System.out.println(x);
+		int x = 1;
+		x = 2;
+		System.out.println(x);
 	}
 }
 ```
@@ -96,6 +96,8 @@ fn main() {
 }
 ```
 
+### シャドウイング
+
 ### 型推論
 
 Rust は静的型付き言語だと述べましたが、ここまで一度も型を書くシーンに出くわしませんでした。これはなぜでしょうか？たとえば下記のプログラムには、型に関する情報が一切出てきていません。Rust は動的型付き言語なのでしょうか？
@@ -113,9 +115,9 @@ fn main() {
 ```java
 public class Main {
 	public static void main(String... args) {
-			int x = 1;
-			x = 2;
-			System.out.println(x);
+		int x = 1;
+		x = 2;
+		System.out.println(x);
 	}
 }
 ```
