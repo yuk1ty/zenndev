@@ -17,7 +17,7 @@ struct Order {
     id: i32,
     pic: String,
     date: String,
-    done: bool
+    accepted: bool
 }
 ```
 
@@ -28,7 +28,7 @@ struct Order {
     id: i32,
     pic: String,
     date: String,
-    done: bool
+    accepted: bool
 }
 
 fn main() {
@@ -36,7 +36,7 @@ fn main() {
         id: 1,
         pic: "Yuki Toyoda".to_string(), // 担当者は私
         date: "2021-03-03T09:00:00Z".to_string(), // 2021/03/03の9時に受付
-        done: false // まだ完了していないので false
+        accepted: false // まだ注文を受理していないので false
     };
     // ...続く
 }
@@ -51,18 +51,18 @@ struct Order {
     id: i32,
     pic: String,
     date: String,
-    done: bool,
+    accepted: bool,
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         // 構造体の定義上のフィールド名と、構造体を生成する際に渡す変数名とが
         // 完全に一致する場合は、`id: id` といった繰り返しの記法が不要になる。
         Order {
             id,
             pic,
             date,
-            done,
+            accepted,
         }
     }
 }
@@ -77,10 +77,26 @@ fn main() {
 }
 ```
 
-`Order::new` の `::new` は、それがスタティックなメソッドであることを示します。これは要するに Java でいうところの `static` メソッドと同じです。Java で書き直すとしたら、上述のコードは次のコードと対応しています。
+`Order::new` の `::new` は、それがスタティックなメソッドであることを示します。これは要するに Java でいうところの `static` メソッドと同じです。Java で書き直すとしたら、上述のコードは次のコードと対応しています。（注: Java では `new` は予約語なので、本来は関数名としては使用できない。このコードはコンパイルエラーとなる）
 
 ```java
+public class Order {
+    private final int id;
+    private final String pic;
+    private final String date;
+    private final boolean accepted;
 
+    private Order(int id, String pic, String date, boolean accepted) {
+        this.id = id;
+        this.pic = pic;
+        this.date = date;
+        this.accepted = accepted;
+    }
+
+    public static Order new(int id, String pic, String date, boolean accepted) {
+        return new Order(id, pic, date, accepted);
+    }
+}
 ```
 
 スタティックなメソッドを定義するだけでは困ってしまうので、インスタンスに紐づくメソッドも定義してみましょう。たとえば、`Order` 自身が保持する担当者と終了状況のペアを返すメソッドを定義してみましょう。
@@ -90,31 +106,93 @@ struct Order {
     id: i32,
     pic: String,
     date: String,
-    done: bool
+    accepted: bool
 }
 
 impl Order {
     // (先の続きに下記を追加する)
 
     pub fn quick_look(self) -> (String, bool) {
-        (self.pic, self.done)
+        (self.pic, self.accepted)
     }
 }
 
 fn main() {
     let order = Order::new(1, "Yuki Toyoda".to_string(), "2021-03-03T09:00:00Z".to_string(), false);
-    let (pic, done) = order.quick_look();
-    println!("担当者: {}, 完了: {}", pic, done);
+    let (pic, accepted) = order.quick_look();
+    println!("担当者: {}, 完了: {}", pic, accepted);
 }
 ```
 
 メソッドの呼び出し自体は他の言語とまったく同じで変わるところはありません。`order` という変数に、`Order` のインスタンスを代入しておきます。そのインスタンスの情報から、`quick_look` というメソッドを引っ張ってきて呼び出しをします。
 
-ここで、quick_look という関数を少し詳しく見てみましょう。まずメソッドの場合は、Python と同じように第一引数に `self` というキーワードを持ちます。まずこの状態ですと、イミュータブルな関数であることを示しています。この後説明しますが、ここを `mut self` とすると、ミュータブルな関数を定義でき、構造体自身の内部構造を破壊的に変更していくメソッドを用意することもできます。
+ここで、quick_look という関数を少し詳しく見てみましょう。まずメソッドの場合は、Python と同じように第一引数に `self` というキーワードを持ちます。まずこの状態ですと、イミュータブルな関数であることを示しています。
 
 ```rust
 pub fn quick_look(self) -> (String, bool) {
-    (self.pic, self.done)
+    (self.pic, self.accepted)
+}
+```
+
+ちなみに、超強引に Java で上記を実装するなら、次のようになります。Java には `Tuple` がないので自前で実装することになります。
+
+```java
+public class Order {
+
+    public static class Tuple<A, B> {
+        private final A a;
+        private final B b;
+        public Tuple(A a, B b) {
+            this.a = a;
+            this.b = b;
+        }
+    }
+
+    private final int id;
+    private final String pic;
+    private final String date;
+    private final boolean accepted;
+
+    private Order(int id, String pic, String date, boolean accepted) {
+        this.id = id;
+        this.pic = pic;
+        this.date = date;
+        this.accepted = accepted;
+    }
+
+    public static Order create(int id, String pic, String date, boolean accepted) {
+        return new Order(id, pic, date, accepted);
+    }
+
+    public Tuple<String, Boolean> quickLook() {
+        return new Tuple(this.pic, this.accepted);
+    }
+}
+```
+
+`quickLook` はインスタンスに紐づくメソッドなので、先ほどとは違い `static` がつきません。こういった対応関係になっています。
+
+話がそれました。現時点ではイミュータブルなメソッドのみを紹介してきました。ミュータブルなメソッド、つまり構造体の中身を書き換えるようなメソッドは提供できるのでしょうか。もちろんできます。先ほど `self` だったものを `mut self` とすると、構造体の中身を書き換えるような操作を行うことができるようになります。
+
+注文の例でイミュータブルな操作を考える際にわかりやすいのは、注文が完了したと設定するための関数を用意することでしょう。ということで、`get_accepted` というメソッドを用意することにしましょう。下記のように書きます。
+
+```rust
+impl Order {
+    pub fn get_accepted(mut self) {
+        self.accepted = true;
+    }
+}
+```
+
+とても単純ですが、自身の `accepted` フィールドを `true` に書き換えています。こうすることで、注文の処理がすべて完了したことを意味します。
+
+呼び出す際は、通常の `self` の場合とは違い、変数宣言時に `mut` を付与する必要があります。ない場合にはコンパイルエラーになります。
+
+```rust
+fn main() {
+    let mut order = Order::new(1, "Yuki Toyoda".to_string(), "2021-03-03T09:00:00Z".to_string(), false);
+    order.get_accepted();
+    println!("{}", order.accepted);
 }
 ```
 
@@ -126,7 +204,7 @@ struct Order {
     pic: String,
     date: String,
     items: Vec<Item>,
-    done: bool
+    accepted: bool
 }
 
 struct Item {
@@ -139,7 +217,7 @@ struct Item {
 
 ```rust
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         // 構造体の定義上のフィールド名と、構造体を生成する際に渡す変数名とが
         // 完全に一致する場合は、`id: id` といった繰り返しの記法が不要になる。
         Order {
@@ -147,7 +225,7 @@ impl Order {
             pic,
             date,
             items: vec![], // Order を用意したい際には、一旦注文された商品は空っぽであるとする。
-            done
+            accepted
         }
     }
 }
@@ -189,6 +267,29 @@ fn main() {
     order.add_item(Item::new(1, "ハイボール".to_string()));
 }
 ```
+
+:::message
+Rust の `self` と `mut self` について、ざっくりしたイメージを持つなら、`self` は `self` 用の呼び出し可能なメソッド群があり、`mut self` は `mut self` 用の呼び出し可能なメソッド群があると捉えられるでしょう。
+
+たとえば、ある構造体 `A` に対して、
+
+- self 側
+  - a
+  - b
+  - c
+- mut self 側
+  - d
+  - e
+  - f
+
+という設定がされていた場合、この構造体をイミュータブルに宣言する（`let a = A {}`）と、使用可能になるメソッドは `a`, `b`, `c` のみとなります。
+
+一方で、ミュータブルに宣言する（`let mut a = A {}`）と、使用可能になるメソッドは `d`, `e`, `f` のみとなります。
+
+この規則は、構造体が保有する別のデータにも適用されます。いい例が先ほどの `items` に使われていた `Vec` でしょう。実は、`Vec::push` は定義を確認するとわかるのですが `&mut self` です。つまり、ミュータブルなメソッドということになります。これを呼び出し可能にするためには、`Order` を `mut` にする必要があるのでした。したがって、`add_item` メソッドは、`mut self` をもっていたわけです。自身に対するミュータブルな `self` をもつことで、`Vec` に対してもミュータブルな操作を可能になる、という具合です。
+
+ちなみに、`mut self` は `self` を含みます。つまり、`mut self` としておくと、`self` も `mut self` も呼び出し可能になります。逆はできません。
+:::
 
 ### 余談: 所有権との邂逅
 
@@ -315,17 +416,17 @@ enum Item {
 
 先ほどの `Item` の追加関数があったことを思い出してください。これを拡張して、バケットに入ったアイテムを一気に追加できる仕様にしてみましょう。
 
-一旦下記のように書くと、要素を一気に追加することができます。
+一旦下記のように書くと、要素を一気に追加することができます[^2]。
 
 ```rust
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
             date,
             items: vec![],
-            done
+            accepted
         }
     }
 
@@ -448,7 +549,7 @@ struct Order {
     pic: String,
     date: String,
     items: Vec<Item>,
-    done: bool,
+    accepted: bool,
 }
 
 enum Item {
@@ -501,13 +602,13 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
             date,
             items: vec![],
-            done,
+            accepted,
         }
     }
 
@@ -557,7 +658,7 @@ impl Order {
             pic: self.pic,
             date: self.date,
             items: self.items,
-            done: self.done
+            accepted: self.accepted
         }
     }
 }
@@ -654,7 +755,7 @@ struct Order {
     pic: String,
     date: String,
     items: Vec<Item>,
-    done: bool,
+    accepted: bool,
 }
 
 enum Item {
@@ -705,13 +806,13 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
             date,
             items: vec![],
-            done,
+            accepted,
         }
     }
 
@@ -725,7 +826,7 @@ impl Order {
             pic: self.pic,
             date: self.date,
             items: self.items,
-            done: self.done,
+            accepted: self.accepted,
         }
     }
 
@@ -755,6 +856,7 @@ fn main() {
         name: "サントリーハイボール".to_string(),
         percentage: 7,
     };
+
     let new_order = order.add_items(vec![t_shirt, highball]);
     let items_detail = new_order.show_items_detail();
 
@@ -768,6 +870,8 @@ fn main() {
 :::
 
 ## 演習
+
+### 色に関する追加
 
 - たとえば「色」は、新しい `Colours` という enum を定義できるはずです。`CoralPink`（コーラルピンク）, `Sand`（サンド）, `Sacks`（サックス）という 3 種類の色を追加しましょう。
 - `Clothes` にある `colour` は現在文字列型ですが、それを `Colours` enum を使用するように置き換えてみましょう。
@@ -786,7 +890,7 @@ struct Order {
     pic: String,
     date: String,
     items: Vec<Item>,
-    done: bool,
+    accepted: bool,
 }
 
 enum Item {
@@ -853,13 +957,13 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, done: bool) -> Order {
+    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
             date,
             items: vec![],
-            done,
+            accepted,
         }
     }
 
@@ -873,7 +977,7 @@ impl Order {
             pic: self.pic,
             date: self.date,
             items: self.items,
-            done: self.done
+            accepted: self.accepted
         }
     }
 
@@ -903,6 +1007,7 @@ fn main() {
         name: "サントリーハイボール".to_string(),
         percentage: 7,
     };
+
     let new_order = order.add_items(vec![t_shirt, highball]);
     let items_detail = new_order.show_items_detail();
 
@@ -915,4 +1020,30 @@ fn main() {
 
 :::
 
+### その他も enum にできないだろうか？
+
+- 産地が仮に国別コードだとすると、`Country` という enum が考えられますね。
+- ISBN は 10 桁のものと 13 桁のものが存在します。`Isbn` という enum に、`Isbn::Ten` と `Isbn::Thirteen` が作れるかもしれません。また、これらの enum に Isbn コードそのものの情報をもたせられるはずです。
+- これらを同様に標準出力で表示させてみるのもおもしろいかもしれません。
+- enum のサンプルは下記に載せておきます。
+
+```rust
+enum Countries {
+    Usa,
+    Uk,
+    Canada,
+    Japan,
+    China,
+    SouthKorea,
+}
+```
+
+```rust
+enum Isbn {
+    Ten(String),
+    Thirteen(String)
+}
+```
+
 [^1]: みなさんが所有権をマスターした暁には、このメソッドには `&mut self` を使用することで、上述のような所有権問題を回避できるようになります。が、今はまだ所有権を意識しないプログラミングをしてもらいたいので、わざとこのような実装を行っています。
+[^2]: イテレータをひとつひとつ回しながら `push` する部分の処理は、ベクタ同士の結合を行う処理です。実はこのケースは `Vec::append` を使用すれば[1 行で終了です](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.append)。が、まだ説明していない `&mut` を実引数につける必要が出てくるため、今回は採用しませんでした。一般には `append` を素直に使用することが多いはずです。
