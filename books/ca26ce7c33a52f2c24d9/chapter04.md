@@ -28,7 +28,7 @@ fn main() {
     let text = if number < 5 {
         "5より小さい = true"
     } else {
-        "5より小さい = false")
+        "5より小さい = false"
     };
     println!("{}", text);
 }
@@ -159,12 +159,44 @@ fn main() {
 
 ## 演習
 
-配列から指定した数値を取り出す関数を作ってみましょう。1 つでも見つかった場合には「found!」、そうでない場合には「not found!」という文字列を返すものとします。
+### fizzbuzz
+
+1〜100 までの fizzbuzz を実装してみましょう。
+
+:::details 答え
+
+```rust
+fn main() {
+    for n in 1..101 {
+        if n % 15 == 0 {
+            println!("FizzBuzz!");
+        } else if n % 3 == 0 {
+            println!("Fizz!");
+        } else if n % 5 == 0 {
+            println!("Buzz!");
+        } else {
+            println!("{}", n);
+        }
+    }
+}
+```
+
+:::
+
+### find 関数
+
+ベクタから指定した数値を取り出す関数を作ってみましょう。1 つでも見つかった場合には「found!」、そうでない場合には「not found!」という文字列を返すものとします。
 
 関数のシグネチャは下記のようになります。
 
 ```rust
 fn find(source: Vec<i32>, target: i32) -> String
+```
+
+また、ベクタは次のようにして宣言できます。
+
+```rust
+vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
 
 :::details 答え
@@ -175,10 +207,10 @@ fn find(source: Vec<i32>, target: i32) -> String
 fn find(source: Vec<i32>, target: i32) -> String {
     for s in source.into_iter() {
         if s == target {
-            return "found!".to_string()
+            return format!("found! {}", target)
         }
     }
-    "not found".to_string()
+    format!("not found")
 }
 
 fn main() {
