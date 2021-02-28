@@ -10,11 +10,11 @@ Java でいうところの下記をやりたい際に、どうしたらよいか
 
 ```java
 public class Main {
-		public static void main(String... args) {
-				int x = 1;
-				x = 2;
-				System.out.println(x);
-		}
+	public static void main(String... args) {
+			int x = 1;
+			x = 2;
+			System.out.println(x);
+	}
 }
 ```
 
@@ -71,7 +71,7 @@ error[E0384]: cannot assign twice to immutable variable `x`
 - help: make this binding mutable: `mut x`
   - この束縛をミュータブルにしよう: `mut x`
 
-このエラーが出た理由は、**Rust の変数宣言はデフォルトでイミュータブルだから**す。イミュータブルとはどういうことかというと、文脈によっていくつか意味が出てきますが、
+このエラーが出た理由は、**Rust の変数宣言はデフォルトでイミュータブルだから**です。イミュータブルとはどういうことかというと、文脈によっていくつか意味が出てきますが、
 
 - 作成した後はその中身を変更できない。
   - 変数ならば、作成後は再代入を通じた値の書き換えをできない。
@@ -112,11 +112,11 @@ fn main() {
 
 ```java
 public class Main {
-		public static void main(String... args) {
-				int x = 1;
-				x = 2;
-				System.out.println(x);
-		}
+	public static void main(String... args) {
+			int x = 1;
+			x = 2;
+			System.out.println(x);
+	}
 }
 ```
 
@@ -147,7 +147,7 @@ Rust では次のように書きます。
 ```rust
 fn should_test_barium(age: i32) -> bool {
     println!("あなたは {} 歳です", age);
-    age > 35
+    age >= 35
 }
 
 fn main() {
