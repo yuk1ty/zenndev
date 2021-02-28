@@ -268,7 +268,7 @@ Rust で構造体に対してメソッドを生やして、構造体というま
 enum Item {
     Clothes,
     Foods,
-    Liquor,
+    Booze,
     Books
 }
 ```
@@ -300,7 +300,7 @@ enum Item {
         name: String,
         made_in: String,
     },
-    Liquor {
+    Booze {
         id: i32,
         name: String,
         percentage: i32,
@@ -352,7 +352,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: "赤色".to_string(),
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
@@ -405,7 +405,7 @@ impl Item {
         match self {
             Item::Clothes { _, _, _ } => "服！".to_string(),
             Item::Foods { _, _, _ } => "食料品！".to_string(),
-            Item::Liquor { _, _, _ } => "お酒！".to_string(),
+            Item::Booze { _, _, _ } => "お酒！".to_string(),
             Item::Books { _, _, _ } => "書籍！".to_string()
         }
     }
@@ -424,7 +424,7 @@ impl Item {
             Item::Foods { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
             }
-            Item::Liquor {
+            Item::Booze {
                 id,
                 name,
                 percentage,
@@ -462,7 +462,7 @@ enum Item {
         name: String,
         made_in: String,
     },
-    Liquor {
+    Booze {
         id: i32,
         name: String,
         percentage: i32,
@@ -485,7 +485,7 @@ impl Item {
             Item::Foods { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
             }
-            Item::Liquor {
+            Item::Booze {
                 id,
                 name,
                 percentage,
@@ -533,7 +533,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: "赤色".to_string(),
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
@@ -578,7 +578,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: "赤色".to_string(),
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
@@ -619,7 +619,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: "赤色".to_string(),
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
@@ -668,7 +668,7 @@ enum Item {
         name: String,
         made_in: String,
     },
-    Liquor {
+    Booze {
         id: i32,
         name: String,
         percentage: i32,
@@ -689,7 +689,7 @@ impl Item {
             Item::Foods { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
             }
-            Item::Liquor {
+            Item::Booze {
                 id,
                 name,
                 percentage,
@@ -750,7 +750,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: "赤色".to_string(),
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
@@ -800,7 +800,7 @@ enum Item {
         name: String,
         made_in: String,
     },
-    Liquor {
+    Booze {
         id: i32,
         name: String,
         percentage: i32,
@@ -837,7 +837,7 @@ impl Item {
             Item::Foods { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
             }
-            Item::Liquor {
+            Item::Booze {
                 id,
                 name,
                 percentage,
@@ -898,7 +898,7 @@ fn main() {
         name: "小さいTシャツ".to_string(),
         colour: Colours::CoralPink,
     };
-    let highball = Item::Liquor {
+    let highball = Item::Booze {
         id: 2,
         name: "サントリーハイボール".to_string(),
         percentage: 7,
