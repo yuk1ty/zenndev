@@ -168,4 +168,67 @@ fn main() {
 
 ## 演習
 
-`cat` コマンドを実装してみましょう。
+`cat` コマンド（に近いもの）を実装してみましょう。
+
+やることは
+
+1. 実行時引数にファイルパスを入力する。
+2. 実行する。
+3. 指定されたパスにあるファイルの中身を表示する。
+
+です。
+
+`std::fs::read_to_string` という関数を使用すると、指定されたパスに存在するファイルを読み込み、中身を文字列で受け取って表示します。
+
+`std::fs::read_to_string` は、Result 型を返す定義を持ちます。正常系だった場合は `Ok` の中にファイルの中身の文字列が入ってきて、異常系だった場合は `Err` の中にエラーの内容が入ってきます。
+
+`Err` だった場合は、エラーの内容を表示してみましょう。表示自体は `Err(err) => println!("{}", err)` を使うとできます。
+
+```rust
+fn run(path: String) {
+    // 処理を書いてみましょう
+}
+
+fn main() {
+    run("./src/main.rs") // main.rs を表示できるようになるはずです
+}
+```
+
+次に、ファイルパスを自由に与えられるようにしてみましょう。つまり、実行時引数からファイルパスを取得し、そのパスを読み込むという処理に修正していきます。
+
+たとえば `cargo run` で実行するなら、次のようにファイルパスを与えられます。
+
+```
+$ cargo run ./src/main.rs
+```
+
+実行時引数は、`std::env::args` という関数を使用すると受け取れます。`std::env::args().nth(1)` で、今回欲しい 1 つ目の引数を取得できるはずです。
+
+`nth` 関数は、引数を取得してみた結果を `Option` に入れて返します。`None` だった場合は、引数が必要なことをユーザーに知らせましょう。
+
+先ほど書いた関数にさらに処理を追加し、`cat` コマンドを完成させましょう。
+
+- std::fs::read_to_string: https://doc.rust-lang.org/std/fs/fn.read_to_string.html
+- std::env::args: https://doc.rust-lang.org/beta/std/env/fn.args.html
+
+:::details 答え
+エラーメッセージの内容などはお好みで。
+
+```rust
+fn run(path: String) {
+    match std::fs::read_to_string(path) {
+        Ok(content) => print!("{}", content),
+        Err(why) => println!("{}", why),
+    }
+}
+
+fn main() {
+    let args = std::env::args();
+    match args.nth(1) {
+        Some(path) => run(path),
+        None => println!("1つ目の実行時引数にファイルパスを入れる必要があります。")
+    }
+}
+```
+
+:::
