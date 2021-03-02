@@ -167,7 +167,96 @@ fn main() {
 
 エラーを伝播させて、最後の最後だけ標準出力するなりでさばきたいというユースケースがあると思います。Rust ではそのようなユースケースに対応できるように、シンタックスシュガー `?` が用意されています。
 
-（書く）
+たとえば 3 つのファイルを読み込んで、1 つが正常に読み込めたら次のファイル、読み込んだ際に見つからないなどのエラーが見つかった場合はエラーメッセージを返すというような実装をするとしましょう。下記のように書くことができます。
+
+```rust
+fn file_read(path: String) -> Result<String, String> {
+    // std::fs::read_to_string を使うと、指定パスのファイルを読み込み、文字列を生成します
+    match std::fs::read_to_string(path.clone()) {
+        Ok(content) => Ok(content),
+        Err(_) => Err(format!("ファイルの読み込みに失敗しました: {}", path)), // Err(_) の `_` は、その値を使用しない際に使えるイディオムです
+    }
+}
+
+fn execute(path1: String, path2: String, path3: String) -> Result<String, String> {
+    let file1 = file_read(path1)?;
+    let file2 = file_read(path2)?;
+    let file3 = file_read(path3)?;
+    Ok(format!(
+        "file1: {}\nfile2: {}\nfile3: {}",
+        file1, file2, file3
+    ))
+}
+
+fn main() {
+    match execute(
+        "path1".to_string(),
+        "path2".to_string(),
+        "path3".to_string(),
+    ) {
+        Ok(content) => println!("{}", content),
+        Err(err) => println!("{}", err),
+    }
+}
+```
+
+たとえば上記の例で、`file1` の読み込みは成功し、`file2` の読み込みに失敗したとします。すると、処理自体は `file2` で止まり、そのまま `Err` として値が返されていきます。これがシンタックスシュガー `?` のもつ機能です。
+
+ちなみに、使用できる条件としてはエラーの型が一致している必要があります。たとえば下記はコンパイルエラーになります。
+
+```rust
+// 先ほど用意したエラーは String 型の関数
+fn file_read(path: String) -> Result<String, String> {
+    match std::fs::read_to_string(path) {
+        Ok(content) => Ok(content),
+        Err(_) => Err("ファイルの読み込みに失敗しました: {}".to_string()),
+    }
+}
+
+// エラーの型を bool に変えてみた。エラーの型を bool にすることはまったくないが…
+fn file_read_return_bool(path: String) -> Result<String, bool> {
+    match std::fs::read_to_string(path) {
+        Ok(content) => Ok(content),
+        Err(_) => Err(false),
+    }
+}
+
+fn execute(path1: String, path2: String, path3: String) -> Result<String, String> {
+    let file1 = file_read(path1)?;
+    // 変えた関数を使用するように調整した
+    // コンパイルは通らない
+    let file2 = file_read_return_bool(path2)?;
+    let file3 = file_read(path3)?;
+    Ok(format!(
+        "file1: {}\nfile2: {}\nfile3: {}",
+        file1, file2, file3
+    ))
+}
+```
+
+コンパイルエラーは下記のように出てきます。下記が意味するところは、`bool` を `String` に変換するトレイト（このハンズオンの後半で出てきます、一旦は「そういう振る舞いを与える実装」の意味だと思ってください）を実装していないから、コンパイルを通すことはできないという旨です。
+
+```
+error[E0277]: `?` couldn't convert the error to `String`
+  --> src/main.rs:19:45
+   |
+17 | fn execute(path1: String, path2: String, path3: String) -> Result<String, String> {
+   |                                                            ---------------------- expected `String` because of this
+18 |     let file1 = file_read(path1)?;
+19 |     let file2 = file_read_return_bool(path2)?;
+   |                                             ^ the trait `From<bool>` is not implemented for `String`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: the following implementations were found:
+             <String as From<&String>>
+             <String as From<&mut str>>
+             <String as From<&str>>
+             <String as From<Box<str>>>
+           and 2 others
+   = note: required by `from`
+```
+
+シンタックスシュガー `?` を使用することで、`unwrap` や多重パターンマッチングを使用する必要がなくなり、実装がよりクリアになるというメリットがあります。使える場面では積極的に使っていきましょう。
 
 ### まとめ
 
