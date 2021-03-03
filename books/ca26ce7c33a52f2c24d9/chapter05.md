@@ -399,7 +399,7 @@ Rust で構造体に対してメソッドを生やして、構造体というま
 ```rust
 enum Item {
     Clothes,
-    Grocery,
+    Groceries,
     Booze,
     Books
 }
@@ -427,7 +427,7 @@ enum Item {
         name: String,
         colour: String,
     },
-    Grocery {
+    Groceries {
         id: i32,
         name: String,
         made_in: String,
@@ -536,7 +536,7 @@ impl Item {
     fn show_detail(self) -> String {
         match self {
             Item::Clothes { _, _, _ } => "服！".to_string(),
-            Item::Grocery { _, _, _ } => "食料品！".to_string(),
+            Item::Groceries { _, _, _ } => "食料品！".to_string(),
             Item::Booze { _, _, _ } => "お酒！".to_string(),
             Item::Books { _, _, _ } => "書籍！".to_string()
         }
@@ -552,10 +552,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
-            Item::Grocery { id, name, made_in } => {
+            },
+            Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
@@ -589,7 +589,7 @@ enum Item {
         name: String,
         colour: String,
     },
-    Grocery {
+    Groceries {
         id: i32,
         name: String,
         made_in: String,
@@ -613,10 +613,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
-            Item::Grocery { id, name, made_in } => {
+            },
+            Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
@@ -795,7 +795,7 @@ enum Item {
         name: String,
         colour: String,
     },
-    Grocery {
+    Groceries {
         id: i32,
         name: String,
         made_in: String,
@@ -817,10 +817,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
-            Item::Grocery { id, name, made_in } => {
+            },
+            Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
@@ -937,7 +937,7 @@ enum Item {
         name: String,
         colour: Colours,
     },
-    Grocery {
+    Groceries {
         id: i32,
         name: String,
         made_in: String,
@@ -976,7 +976,7 @@ impl Item {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour.colour_name())
             }
-            Item::Grocery { id, name, made_in } => {
+            Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
             }
             Item::Booze {
