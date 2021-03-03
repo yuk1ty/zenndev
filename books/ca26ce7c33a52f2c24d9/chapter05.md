@@ -8,6 +8,8 @@ Rust にはデータ構造を定義する方法が 2 つあります。`struct` 
 
 `struct` というのは新しいデータ型を定義するための構文です。Go や C に登場する構造体と思ってもらって差し支えありません。
 
+### 構造体を定義してみる
+
 たとえば、次のように配送業者の注文情報を保持するためのデータ構造を定義できたりします。
 
 `struct` というキーワードを使って、下記のようにデータ構造を定義できます。
@@ -42,6 +44,8 @@ fn main() {
 }
 ```
 
+### 構造体に実装を追加してみる
+
 `struct` に対しては、具体的にどのような値を扱うかに関する関数の実装を他の言語と同じように与えることができます。いわゆるメソッドというものです。メソッドの定義は、`impl` というキーワードを使って行えます。
 
 ここで、Rust でよく使うイディオムとして `new` というものがあるので、それを実装してみます。`struct` にはコンストラクタのようなものは言語機能上ありませんが、コンストラクタを `new` という関数名でよく定義します。これは慣習のようなもので、非常によく使われます。
@@ -55,7 +59,7 @@ struct Order {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         // 構造体の定義上のフィールド名と、構造体を生成する際に渡す変数名とが
         // 完全に一致する場合は、`id: id` といった繰り返しの記法が不要になる。
         Order {
@@ -112,7 +116,7 @@ struct Order {
 impl Order {
     // (先の続きに下記を追加する)
 
-    pub fn quick_look(self) -> (String, bool) {
+    fn quick_look(self) -> (String, bool) {
         (self.pic, self.accepted)
     }
 }
@@ -129,7 +133,7 @@ fn main() {
 ここで、quick_look という関数を少し詳しく見てみましょう。まずメソッドの場合は、Python と同じように第一引数に `self` というキーワードを持ちます。まずこの状態ですと、イミュータブルな関数であることを示しています。
 
 ```rust
-pub fn quick_look(self) -> (String, bool) {
+fn quick_look(self) -> (String, bool) {
     (self.pic, self.accepted)
 }
 ```
@@ -178,7 +182,7 @@ public class Order {
 
 ```rust
 impl Order {
-    pub fn get_accepted(mut self) {
+    fn get_accepted(mut self) {
         self.accepted = true;
     }
 }
@@ -196,7 +200,32 @@ fn main() {
 }
 ```
 
-所有権や借用に関する話をまだまったくしていませんが、ここで少しチャレンジングな内容に取り組んでみましょう。まず、注文した商品を保持できるように、`items` というフィールドを追加します。フィールド自体は、一旦 `struct Item` というものを用意しておきましょう。これはこの後変更します。
+:::message
+`to_string` という関数が登場してきて、すこしまどろっこしいと感じたかもしれません。
+
+Rust では、ダブルクオーテーションで囲んだ文字列の型は `&str` 型になります。これはサイズ固定の UTF-8 の文字列で、文字列の追加や削除などが不可能な形式です。メモリ上に保有する文字列データに対する参照を保持しているイメージです。要するに実データは保持しておらず、ただその文字列の領域を指し示すのみです。実データを持っていないので、その文字列に対する変更などは行なえません。
+
+一方で、`to_string` という関数を呼び出すと、ダブルクオーテーションで囲まれた `&str` 型の文字列は `String` 型に変換されます。この型はサイズ可変の UTF-8 文字列で、文字列の追加や削除などが可能な形式です。文字列自体はヒープ領域に保持されており、ヒープ領域上の実データを持っています。実データを持っているので、その文字列に対する変更などが行えるわけです。
+
+このハンズオンでは、最初の方は混乱を避けるためにすべて `String` で統一して扱います。こうすることで、不要な借用が発生せず、高級言語出身者でも Rust の概観をつかみやすくなると筆者が考えるためです。
+
+今回、`Order::new` の中身も `String` 型で定義していました。そのため、`to_string` という関数を毎回要求されるわけです。
+
+これがだるいという場合には、実はちょっとしたワークアラウンドがあります。このハンズオンでは後半に紹介する予定ですが、`impl Trait` という機能を使って次のように書き換えると、`&str` でも `String` でも受け取り可能な引数をもつ関数を作成できます。
+
+```rust
+impl Order {
+    fn new(id: i32, pic: impl Into<String>, date: impl Into<String>, accepted: bool) -> Order {
+        ...
+    }
+}
+```
+
+:::
+
+## 新しい構造体を構造体自身に追加してみる
+
+ここで少しチャレンジングな内容に取り組んでみましょう。まず、注文した商品を保持できるように、`items` というフィールドを追加します。フィールド自体は、一旦 `struct Item` というものを用意しておきましょう。これはこの後変更します。
 
 ```rust
 struct Order {
@@ -217,7 +246,7 @@ struct Item {
 
 ```rust
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         // 構造体の定義上のフィールド名と、構造体を生成する際に渡す変数名とが
         // 完全に一致する場合は、`id: id` といった繰り返しの記法が不要になる。
         Order {
@@ -231,7 +260,7 @@ impl Order {
 }
 
 impl Item {
-    pub fn new(id: i32, name: String) -> Item {
+    fn new(id: i32, name: String) -> Item {
         Item {
             id,
             name,
@@ -240,13 +269,15 @@ impl Item {
 }
 ```
 
+### 構造体自身にミュータブルな操作をする関数を追加してみる
+
 さて、商品の注文が行われた際に、商品を注文内容に追加できる関数を作ってみましょう。下記のようにすると作成できます。
 
 ```rust
 impl Order {
     // (quick_look 関数の下に書きましょう)
 
-    pub fn add_item(mut self, item: Item) {
+    fn add_item(mut self, item: Item) {
         self.items.push(item);
     }
 }
@@ -325,7 +356,7 @@ error[E0382]: use of moved value: `order`
 なぜでしょうか。ここには所有権という問題が絡んできます。先ほど定義したメソッドをもう一度眺めてみましょう。
 
 ```rust
-pub fn add_item(mut self, item: Item) {
+fn add_item(mut self, item: Item) {
     self.items.push(item);
 }
 ```
@@ -335,7 +366,7 @@ pub fn add_item(mut self, item: Item) {
 これを回避するためにはどうしたらよいでしょうか？借用という考え方が Rust にはあり、それを利用することで回避できるようになります。つまり、先頭に `&` をつけることで実現できます。
 
 ```rust
-pub fn add_item(&mut self, item: Item) {
+fn add_item(&mut self, item: Item) {
     self.items.push(item);
 }
 ```
@@ -420,7 +451,7 @@ enum Item {
 
 ```rust
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
@@ -430,7 +461,7 @@ impl Order {
         }
     }
 
-    pub fn add_items(mut self, is: Vec<Item>) {
+    fn add_items(mut self, is: Vec<Item>) {
         for item in is.into_iter() {
             self.items.push(item);
         }
@@ -474,7 +505,7 @@ enum への実装の追加は、やはり構造体と同様に `impl` という�
 
 ```rust
 impl Item {
-    pub fn red_clothes(id: i32, name: String) -> Item {
+    fn red_clothes(id: i32, name: String) -> Item {
         Item::Clothes {
             id,
             name,
@@ -490,7 +521,7 @@ enum の内容を表示する便利メソッドを作りましょう。まず、
 
 ```rust
 impl Item {
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         "何か情報を返します".to_string()
     }
 }
@@ -502,7 +533,7 @@ impl Item {
 
 ```rust
 impl Item {
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         match self {
             Item::Clothes { _, _, _ } => "服！".to_string(),
             Item::Foods { _, _, _ } => "食料品！".to_string(),
@@ -517,7 +548,7 @@ enum の値は取り出すことができます。最終的には下記のよう
 
 ```rust
 impl Item {
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
@@ -578,7 +609,7 @@ enum Item {
 impl Item {
     // red_clothes は今回は使用しないので、削除しています。
 
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
@@ -602,7 +633,7 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
@@ -615,7 +646,7 @@ impl Order {
     // quick_look は今回は使用しないので、削除しています。
 
     // 商品を追加するメソッド
-    pub fn add_items(mut self, is: Vec<Item>) {
+    fn add_items(mut self, is: Vec<Item>) {
         for item in is.into_iter() {
             self.items.push(item);
         }
@@ -648,7 +679,7 @@ fn main() {
 ```rust
 impl Order {
     // add_items を書き換えましょう
-    pub fn add_items(mut self, is: Vec<Item>) -> Order {
+    fn add_items(mut self, is: Vec<Item>) -> Order {
         for item in is.into_iter() {
             self.items.push(item);
         }
@@ -695,7 +726,7 @@ fn main() {
 
 ```rust
 impl Order {
-    pub fn show_items_detail(self) -> Vec<String> {
+    fn show_items_detail(self) -> Vec<String> {
         let mut results = Vec::new();
         for item in self.items.into_iter() {
             results.push(item.show_detail());
@@ -782,7 +813,7 @@ enum Item {
 }
 
 impl Item {
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
@@ -806,7 +837,7 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
@@ -816,7 +847,7 @@ impl Order {
         }
     }
 
-    pub fn add_items(mut self, is: Vec<Item>) -> Order {
+    fn add_items(mut self, is: Vec<Item>) -> Order {
         for item in is.into_iter() {
             self.items.push(item);
         }
@@ -830,7 +861,7 @@ impl Order {
         }
     }
 
-    pub fn show_items_detail(self) -> Vec<String> {
+    fn show_items_detail(self) -> Vec<String> {
         let mut results = Vec::new();
         for item in self.items.into_iter() {
             results.push(item.show_detail());
@@ -930,7 +961,7 @@ enum Colours {
 }
 
 impl Colours {
-    pub fn colour_name(self) -> String {
+    fn colour_name(self) -> String {
         match self {
             CoralPink => "コーラルピンク".to_string(),
             Sand => "サンド".to_string(),
@@ -940,7 +971,7 @@ impl Colours {
 }
 
 impl Item {
-    pub fn show_detail(self) -> String {
+    fn show_detail(self) -> String {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour.colour_name())
@@ -964,7 +995,7 @@ impl Item {
 }
 
 impl Order {
-    pub fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
+    fn new(id: i32, pic: String, date: String, accepted: bool) -> Order {
         Order {
             id,
             pic,
@@ -974,7 +1005,7 @@ impl Order {
         }
     }
 
-    pub fn add_items(mut self, is: Vec<Item>) -> Order {
+    fn add_items(mut self, is: Vec<Item>) -> Order {
         for item in is.into_iter() {
             self.items.push(item);
         }
@@ -988,7 +1019,7 @@ impl Order {
         }
     }
 
-    pub fn show_items_detail(self) -> Vec<String> {
+    fn show_items_detail(self) -> Vec<String> {
         let mut results = Vec::new();
         for item in self.items.into_iter() {
             results.push(item.show_detail());
