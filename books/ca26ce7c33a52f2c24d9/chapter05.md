@@ -552,10 +552,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
+            },
             Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
@@ -613,10 +613,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
+            },
             Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
@@ -817,10 +817,10 @@ impl Item {
         match self {
             Item::Clothes { id, name, colour } => {
                 format!("服 (id={}, 名前={}, 色={})", id, name, colour)
-            }
+            },
             Item::Groceries { id, name, made_in } => {
                 format!("食料品 (id={}, 名前={}, 産地={})", id, name, made_in)
-            }
+            },
             Item::Booze {
                 id,
                 name,
