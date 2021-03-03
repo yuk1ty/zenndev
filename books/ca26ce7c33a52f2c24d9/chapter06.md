@@ -163,6 +163,48 @@ fn main() {
 
 なお、`Result` 型にも、`Option` 型と同様に `unwrap` メソッドが用意されています。`Ok` だった場合は、`Ok` が持つ値を返し、`Err` だった場合はパニックします。`Option` と同様に、動作確認時や明らかに `Ok` しか返さない場所で使用すると記述量の低減に繋がります。
 
+:::message
+ちなみに、Rust ではゼロ除算は、明示的に 0 を与えた場合には**コンパイルエラー**になります。
+
+```rust
+fn main() {
+    let a = 1;
+    let b = 0;
+    println!("{}", a / b);
+}
+```
+
+```
+   Compiling playground v0.0.1 (/playground)
+error: this operation will panic at runtime
+ --> src/main.rs:4:20
+  |
+4 |     println!("{}", a / b);
+  |                    ^^^^^ attempt to divide `1_i32` by zero
+  |
+  = note: `#[deny(unconditional_panic)]` on by default
+```
+
+一方で、下記のように実行時にしか値が決まらない場合は、さすがに防ぐことはできず、他の言語と同じように実行時エラーになります。
+
+```rust
+// 実行時引数で数値を与える場合
+// たとえば、cargo run 1 0 とすると、実行時エラーになる
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let a = args[1].parse::<i32>().unwrap();
+    let b = args[2].parse::<i32>().unwrap();
+    println!("{}", a / b);
+}
+```
+
+```
+thread 'main' panicked at 'attempt to divide by zero', src/main.rs:5:20
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+:::
+
 ### シンタックスシュガー
 
 エラーを伝播させて、最後の最後だけ標準出力するなりでさばきたいというユースケースがあると思います。Rust ではそのようなユースケースに対応できるように、シンタックスシュガー `?` が用意されています。
@@ -328,7 +370,7 @@ fn run(path: String) {
 }
 
 fn main() {
-    let args = std::env::args();
+    let mut args = std::env::args();
     match args.nth(1) {
         Some(path) => run(path),
         None => println!("1つ目の実行時引数にファイルパスを入れる必要があります。")
